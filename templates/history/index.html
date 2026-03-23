@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Scan History — JRS Radiology AI{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/history.css') }}"/>
+{% endblock %}
+{% block page_title %}<i class="fas fa-history" style="color:var(--accent-blue)"></i> Scan History{% endblock %}
+
+{% block content %}
+<div class="page-content history-page">
+
+  <!-- Search & Filter -->
+  <div class="search-bar-wrap">
+    <form method="GET" action="{{ url_for('history.index') }}"
+          style="display:flex;gap:12px;flex:1;flex-wrap:wrap;">
+      <div class="search-input-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" name="q" class="form-control"
+               placeholder="Search patient name, ID or disease..."
+               value="{{ query }}"/>
+      </div>
+      <select name="disease" class="form-control filter-select">
+        <option value="">All Diseases</option>
+        {% for label in class_labels %}
+          <option value="{{ label }}" {{ 'selected' if disease == label }}>
+            {{ label }}
+          </option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-search"></i> Search
+      </button>
+      {% if query or disease %}
+      <a href="{{ url_for('history.index') }}" class="btn btn-outline">
+        <i class="fas fa-times"></i> Clear
+      </a>
+      {% endif %}
+    </form>
+    <a href="{{ url_for('upload.index') }}" class="btn btn-teal">
+      <i class="fas fa-plus"></i> New Scan
+    </a>
+  </div>
+
+  <!-- Table -->
+  <div class="card">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>X-Ray</th>
+            <th>Patient</th>
+            <th>Age / Gender</th>
+            <th>Diagnosis</th>
+            <th>Confidence</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for scan in scans %}
+          <tr>
+            <td>
+              <img class="thumb-img"
+                   src="{{ url_for('static', filename='uploads/xrays/' + scan.original_filename) }}"
+                   alt="xray"
+                   onerror="this.src='https://via.placeholder.com/42x42/21262d/8b949e?text=X'"/>
+            </td>
+            <td>
+              <span style="font-weight:600;color:var(--text-primary);">
+                {{ scan.patient_name }}
+              </span><br/>
+              <span style="font-size:11px;color:var(--text-muted);">
+                {{ scan.patient_id }}
+              </span>
+            </td>
+            <td>{{ scan.patient_age }} / {{ scan.patient_gender }}</td>
+            <td>
+              {% if scan.predicted_label == 'Normal' %}
+                <span class="badge badge-normal">{{ scan.predicted_label }}</span>
+              {% else %}
+                {% if scan.is_urgent %}
+                  <span class="urgent-dot"></span>
+                {% endif %}
+                <span class="badge badge-urgent">{{ scan.predicted_label }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <span style="color:var(--accent-blue);font-weight:600;">
+                {{ scan.confidence }}%
+              </span>
+            </td>
+            <td>
+              {% if scan.status == 'reported' %}
+                <span class="badge badge-reported">Reported</span>
+              {% elif scan.status == 'reviewed' %}
+                <span class="badge badge-normal">Reviewed</span>
+              {% else %}
+                <span class="badge badge-pending">Pending</span>
+              {% endif %}
+            </td>
+            <td style="color:var(--text-muted);font-size:12px;white-space:nowrap;">
+              {{ scan.created_at.strftime('%d %b %Y') }}
+            </td>
+            <td>
+              <div class="scan-row-actions">
+                <a href="{{ url_for('heatmap.index', scan_id=scan._id|string) }}"
+                   class="btn btn-outline btn-sm" title="Heatmap">
+                  <i class="fas fa-fire"></i>
+                </a>
+                <a href="{{ url_for('report.index', scan_id=scan._id|string) }}"
+                   class="btn btn-teal btn-sm" title="Report">
+                  <i class="fas fa-file-pdf"></i>
+                </a>
+                <form method="POST"
+                      action="{{ url_for('history.delete', scan_id=scan._id|string) }}"
+                      onsubmit="return confirm('Delete this scan record?')">
+                  <button type="submit" class="btn btn-danger btn-sm" title="Delete">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="8">
+              <div class="empty-state">
+                <i class="fas fa-folder-open"></i>
+                <h3>No scans found</h3>
+                <p>{{ 'No results for "' + query + '"' if query else 'Upload your first X-ray to get started.' }}</p>
+                <a href="{{ url_for('upload.index') }}"
+                   class="btn btn-primary mt-2">
+                  <i class="fas fa-upload"></i> Upload X-Ray
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="pagination mt-2">
+      {% for p in range(1, total_pages + 1) %}
+        <a href="{{ url_for('history.index', page=p, q=query, disease=disease) }}"
+           class="page-btn {{ 'active' if p == page }}">{{ p }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

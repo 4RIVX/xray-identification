@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — JRS Radiology AI{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}"/>
+{% endblock %}
+{% block page_title %}<i class="fas fa-chart-pie" style="color:var(--accent-blue)"></i> Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-content dashboard-page">
+
+  <!-- WELCOME BANNER -->
+  <div class="welcome-banner">
+    <div>
+      <h3>Welcome back, Dr. {{ current_user.name }} 👋</h3>
+      <p>{{ current_user.designation or 'Radiologist' }} &nbsp;·&nbsp;
+         {{ current_user.hospital or 'JRS Eduzone' }} &nbsp;·&nbsp;
+         {{ now.strftime('%d %B %Y') if now else '' }}</p>
+    </div>
+    <a href="{{ url_for('upload.index') }}" class="btn btn-primary">
+      <i class="fas fa-plus"></i> New Scan
+    </a>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="grid-4 mb-3">
+    <div class="stat-card blue">
+      <div class="stat-icon blue"><i class="fas fa-x-ray"></i></div>
+      <div class="stat-info">
+        <p>Total Scans</p>
+        <h2>{{ stats.total_scans }}</h2>
+      </div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+      <div class="stat-info">
+        <p>Urgent Cases</p>
+        <h2>{{ stats.total_urgent }}</h2>
+      </div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+      <div class="stat-info">
+        <p>Normal Results</p>
+        <h2>{{ stats.total_normal }}</h2>
+      </div>
+    </div>
+    <div class="stat-card teal">
+      <div class="stat-icon teal"><i class="fas fa-file-medical"></i></div>
+      <div class="stat-info">
+        <p>Reports Generated</p>
+        <h2>{{ stats.total_reported }}</h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW -->
+  <div class="grid-2 mb-3">
+    <div class="chart-card">
+      <div class="card-title"><i class="fas fa-chart-donut"></i> Disease Distribution</div>
+      <canvas id="donutChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="card-title"><i class="fas fa-chart-bar"></i> Scan Count by Disease</div>
+      <canvas id="barChart"></canvas>
+    </div>
+  </div>
+
+  <!-- RECENT SCANS -->
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between;">
+      <span><i class="fas fa-clock"></i> Recent Scans</span>
+      <a href="{{ url_for('history.index') }}" class="btn btn-outline btn-sm">
+        View All <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Patient</th>
+            <th>Age / Gender</th>
+            <th>Diagnosis</th>
+            <th>Confidence</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for scan in recent_scans %}
+          <tr>
+            <td>
+              <img class="scan-thumb"
+                   src="{{ url_for('static', filename='uploads/xrays/' + scan.original_filename) }}"
+                   alt="xray"
+                   onerror="this.src='https://via.placeholder.com/38x38/21262d/8b949e?text=X'"/>
+            </td>
+            <td>
+              <span style="font-weight:600;color:var(--text-primary);">
+                {{ scan.patient_name }}
+              </span><br/>
+              <span class="recent-label">ID: {{ scan.patient_id }}</span>
+            </td>
+            <td>{{ scan.patient_age }} / {{ scan.patient_gender }}</td>
+            <td>
+              {% if scan.predicted_label == 'Normal' %}
+                <span class="badge badge-normal">{{ scan.predicted_label }}</span>
+              {% else %}
+                <span class="badge badge-urgent">{{ scan.predicted_label }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <span style="color:var(--accent-blue);font-weight:600;">
+                {{ scan.confidence }}%
+              </span>
+            </td>
+            <td>
+              {% if scan.status == 'reported' %}
+                <span class="badge badge-reported">Reported</span>
+              {% elif scan.status == 'reviewed' %}
+                <span class="badge badge-normal">Reviewed</span>
+              {% else %}
+                <span class="badge badge-pending">Pending</span>
+              {% endif %}
+            </td>
+            <td style="color:var(--text-muted);font-size:12px;">
+              {{ scan.created_at.strftime('%d %b %Y') }}
+            </td>
+            <td>
+              <div style="display:flex;gap:6px;">
+                <a href="{{ url_for('heatmap.index', scan_id=scan._id|string) }}"
+                   class="btn btn-outline btn-sm" title="Heatmap">
+                  <i class="fas fa-fire"></i>
+                </a>
+                <a href="{{ url_for('report.index', scan_id=scan._id|string) }}"
+                   class="btn btn-teal btn-sm" title="Report">
+                  <i class="fas fa-file-pdf"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted);">
+              <i class="fas fa-inbox" style="font-size:28px;display:block;margin-bottom:10px;"></i>
+              No scans yet. <a href="{{ url_for('upload.index') }}" style="color:var(--accent-blue);">Upload your first X-ray</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  window.DISEASE_LABELS = {{ disease_labels | tojson }};
+  window.DISEASE_COUNTS = {{ disease_counts | tojson }};
+  window.CHART_COLORS   = {{ chart_colors   | tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

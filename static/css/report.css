@@ -1,0 +1,134 @@
+/* ═══════════════════════════════════════════════
+   REPORT.CSS — PDF Report Editor & Preview
+═══════════════════════════════════════════════ */
+
+.report-page .page-content {
+  background-image: url('/static/backgrounds/bg_report.jpg');
+  background-size: cover;
+  background-attachment: fixed;
+  position: relative;
+}
+
+.report-page .page-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(13,17,23,0.83);
+}
+
+.report-page .page-content > * { position: relative; z-index: 1; }
+
+/* ── REPORT META ─────────────────────────────── */
+.report-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.report-meta-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+}
+
+.report-meta-item .meta-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.report-meta-item .meta-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 4px;
+}
+
+/* ── DIAGNOSIS BOX ──────────────────────────── */
+.diagnosis-box {
+  border-radius: var(--radius);
+  padding: 20px 28px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.diagnosis-box.disease {
+  background: rgba(231,76,60,0.08);
+  border: 2px solid rgba(231,76,60,0.3);
+}
+
+.diagnosis-box.normal {
+  background: rgba(46,204,113,0.08);
+  border: 2px solid rgba(46,204,113,0.3);
+}
+
+.diagnosis-box h2 {
+  font-family: var(--font-title);
+  font-size: 28px;
+  letter-spacing: 2px;
+  font-weight: 700;
+}
+
+/* ── SCAN IMAGES ROW ────────────────────────── */
+.scan-img-row {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.scan-img-card img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+
+.scan-img-card p {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── EDITOR TEXTAREA ────────────────────────── */
+.findings-editor {
+  min-height: 130px;
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+/* ── ACTION BAR ─────────────────────────────── */
+.report-action-bar {
+  position: sticky;
+  bottom: 0;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 50;
+}
+
+/* ── SIGNED BADGE ───────────────────────────── */
+.signed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(46,204,113,0.12);
+  border: 1px solid rgba(46,204,113,0.3);
+  border-radius: 20px;
+  color: var(--accent-green);
+  font-size: 12px;
+  font-weight: 600;
+}

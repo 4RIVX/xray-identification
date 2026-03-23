@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}JRS Radiology AI{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="app-wrapper">
+
+  <!-- ── SIDEBAR ───────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <i class="fas fa-lungs" style="color:var(--accent-blue);font-size:22px;"></i>
+      <h2>JRS Radiology</h2>
+      <span>AI Diagnostic System</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="{{ url_for('dashboard.index') }}"
+         class="{{ 'active' if request.blueprint == 'dashboard' }}">
+        <i class="fas fa-chart-pie"></i> Dashboard
+      </a>
+      <a href="{{ url_for('upload.index') }}"
+         class="{{ 'active' if request.blueprint == 'upload' }}">
+        <i class="fas fa-upload"></i> Upload X-Ray
+      </a>
+
+      <div class="nav-section-label">Records</div>
+      <a href="{{ url_for('history.index') }}"
+         class="{{ 'active' if request.blueprint == 'history' }}">
+        <i class="fas fa-history"></i> Scan History
+      </a>
+
+      <div class="nav-section-label">Account</div>
+      <a href="{{ url_for('profile.index') }}"
+         class="{{ 'active' if request.blueprint == 'profile' }}">
+        <i class="fas fa-user-circle"></i> My Profile
+      </a>
+      <a href="{{ url_for('auth.logout') }}">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </a>
+    </nav>
+
+    <div class="sidebar-user">
+      <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_pic) }}"
+           alt="avatar"
+           onerror="this.src='https://ui-avatars.com/api/?name={{ current_user.name }}&background=0d1117&color=00aaff&size=80'"/>
+      <div class="sidebar-user-info">
+        <p>{{ current_user.name }}</p>
+        <span>{{ current_user.role }}</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN CONTENT ──────────────────────── -->
+  <div class="main-content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <span class="topbar-title">{% block page_title %}Dashboard{% endblock %}</span>
+      <div class="topbar-actions">
+        <a href="{{ url_for('upload.index') }}" class="btn btn-primary btn-sm">
+          <i class="fas fa-plus"></i> New Scan
+        </a>
+        <span style="color:var(--text-secondary);font-size:12px;">
+          <i class="fas fa-circle" style="color:var(--accent-green);font-size:8px;"></i>
+          {{ current_user.hospital or 'JRS Eduzone' }}
+        </span>
+      </div>
+    </header>
+
+    <!-- FLASH MESSAGES -->
+    <div style="padding: 0 28px; margin-top: 16px;">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">
+            <i class="fas fa-{% if category == 'success' %}check-circle
+                               {% elif category == 'danger' %}exclamation-circle
+                               {% elif category == 'warning' %}exclamation-triangle
+                               {% else %}info-circle{% endif %}"></i>
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endwith %}
+    </div>
+
+    <!-- PAGE BODY -->
+    {% block content %}{% endblock %}
+
+  </div>
+</div>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}Upload X-Ray — JRS Radiology AI{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/upload.css') }}"/>
+{% endblock %}
+{% block page_title %}<i class="fas fa-upload" style="color:var(--accent-blue)"></i> Upload X-Ray{% endblock %}
+
+{% block content %}
+<div class="page-content upload-page">
+<div style="max-width:1100px;margin:0 auto;">
+
+  {% if not result %}
+  <!-- ── UPLOAD FORM ──────────────────────────── -->
+  <form method="POST" action="{{ url_for('upload.index') }}"
+        enctype="multipart/form-data" id="upload-form">
+
+    <div class="grid-2">
+      <!-- LEFT: Drop Zone -->
+      <div>
+        <div class="card mb-2">
+          <div class="card-title"><i class="fas fa-image"></i> X-Ray Image</div>
+          <div class="dropzone" id="dropzone">
+            <i class="fas fa-lungs dropzone-icon"></i>
+            <h3>Drop X-Ray Here</h3>
+            <p>or click to browse files</p>
+            <p class="hint">
+              <i class="fas fa-keyboard"></i> Ctrl+V to paste &nbsp;·&nbsp;
+              PNG, JPG, WEBP &nbsp;·&nbsp; Max 16MB
+            </p>
+          </div>
+          <input type="file" name="xray_file" id="xray_file"
+                 accept="image/*" style="display:none"/>
+
+          <div class="preview-box" id="preview-box">
+            <img id="preview-img" src="" alt="Preview"/>
+            <p class="preview-name" id="preview-name"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Patient Info -->
+      <div class="patient-form-card">
+        <div class="card-title"><i class="fas fa-user-injured"></i> Patient Information</div>
+
+        <div class="form-group">
+          <label class="form-label">Patient Full Name</label>
+          <input type="text" name="patient_name" class="form-control"
+                 placeholder="e.g. Rajesh Kumar" required/>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Age</label>
+            <input type="text" name="patient_age" class="form-control" placeholder="e.g. 45"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gender</label>
+            <select name="patient_gender" class="form-control">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Patient ID</label>
+          <input type="text" name="patient_id" class="form-control"
+                 placeholder="e.g. PAT-20260314"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reporting Doctor</label>
+          <input type="text" class="form-control"
+                 value="Dr. {{ current_user.name }}" disabled/>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" id="submit-btn"
+                style="width:100%;justify-content:center;margin-top:8px;">
+          <i class="fas fa-brain"></i> Analyse X-Ray
+        </button>
+      </div>
+    </div>
+  </form>
+
+  {% else %}
+  <!-- ── RESULT SECTION ───────────────────────── -->
+  <div class="grid-2">
+
+    <!-- LEFT: Image -->
+    <div class="card" style="text-align:center;">
+      <div class="card-title"><i class="fas fa-image"></i> Uploaded X-Ray</div>
+      <img src="{{ url_for('static', filename='uploads/xrays/' + img_filename) }}"
+           alt="X-Ray" style="max-width:100%;border-radius:10px;border:1px solid var(--border-color);"/>
+    </div>
+
+    <!-- RIGHT: Result -->
+    <div>
+      <!-- Diagnosis Banner -->
+      <div class="result-banner {{ 'normal' if result.predicted_label == 'Normal' else 'disease' }}">
+        <span class="result-icon">
+          {{ '✅' if result.predicted_label == 'Normal' else '🔴' }}
+        </span>
+        <div>
+          <div class="result-label"
+               style="color:{{ '#2ecc71' if result.predicted_label == 'Normal' else '#e74c3c' }}">
+            {{ result.predicted_label.upper() }}
+          </div>
+          <div class="result-confidence">
+            Confidence: <strong>{{ result.confidence }}%</strong> &nbsp;·&nbsp;
+            Patient: <strong>{{ patient_name }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confidence Bars -->
+      <div class="card mb-2">
+        <div class="card-title"><i class="fas fa-chart-bar"></i> Class Confidence Scores</div>
+        {% for s in result.all_scores %}
+        <div class="conf-bar-wrap">
+          <div class="conf-bar-label">
+            <span>{{ s.class }}</span>
+            <span>{{ s.confidence }}%</span>
+          </div>
+          <div class="conf-bar-track">
+            <div class="conf-bar-fill" data-width="{{ s.confidence }}"
+                 style="width:0%;background:{{ s.color }};"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="result-actions">
+        <a href="{{ url_for('heatmap.index', scan_id=scan_id) }}"
+           class="btn btn-primary">
+          <i class="fas fa-fire"></i> View Heatmap
+        </a>
+        <a href="{{ url_for('report.index', scan_id=scan_id) }}"
+           class="btn btn-teal">
+          <i class="fas fa-file-pdf"></i> Generate Report
+        </a>
+        <a href="{{ url_for('upload.index') }}" class="btn btn-outline">
+          <i class="fas fa-redo"></i> New Scan
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+{% endblock %}

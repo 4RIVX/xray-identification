@@ -1,0 +1,147 @@
+/* ═══════════════════════════════════════════════
+   LOGIN.CSS — Glassmorphism Premium Login
+═══════════════════════════════════════════════ */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url('/static/backgrounds/bg_login.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  position: relative;
+}
+
+.login-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(13, 17, 23, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+.login-box {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 420px;
+  background: rgba(22, 27, 34, 0.85);
+  border: 1px solid rgba(0, 170, 255, 0.2);
+  border-radius: 20px;
+  padding: 44px 40px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,170,255,0.08);
+  backdrop-filter: blur(16px);
+  animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.login-logo {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-logo h1 {
+  font-family: var(--font-title);
+  font-size: 26px;
+  color: var(--accent-blue);
+  letter-spacing: 1.5px;
+}
+
+.login-logo p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.login-logo .logo-icon {
+  font-size: 42px;
+  color: var(--accent-blue);
+  display: block;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 12px rgba(0,170,255,0.5));
+}
+
+.login-box .form-control {
+  background: rgba(13,17,23,0.7);
+  border-color: rgba(48,54,61,0.8);
+}
+
+.login-box .form-control:focus {
+  border-color: var(--accent-blue);
+  background: rgba(13,17,23,0.9);
+}
+
+.login-btn {
+  width: 100%;
+  justify-content: center;
+  padding: 12px;
+  font-size: 14px;
+  border-radius: 10px;
+  margin-top: 6px;
+  background: linear-gradient(135deg, #005fa3, var(--accent-blue));
+  letter-spacing: 1px;
+}
+
+.login-btn:hover {
+  box-shadow: 0 0 24px rgba(0,170,255,0.4);
+  transform: translateY(-2px);
+}
+
+.login-divider {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+  margin: 20px 0;
+  position: relative;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: var(--border-color);
+}
+.login-divider::before { left: 0; }
+.login-divider::after  { right: 0; }
+
+.login-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.login-footer a {
+  color: var(--accent-blue);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-footer a:hover { text-decoration: underline; }
+
+/* Input icon wrapper */
+.input-icon-wrap {
+  position: relative;
+}
+
+.input-icon-wrap i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.input-icon-wrap .form-control {
+  padding-left: 38px;
+}

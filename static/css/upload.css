@@ -1,0 +1,173 @@
+/* ═══════════════════════════════════════════════
+   UPLOAD.CSS — Drag-Drop + Prediction Results
+═══════════════════════════════════════════════ */
+
+.upload-page .page-content {
+  background-image: url('/static/backgrounds/bg_upload.jpg');
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
+  position: relative;
+}
+
+.upload-page .page-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(13,17,23,0.80);
+}
+
+.upload-page .page-content > * { position: relative; z-index: 1; }
+
+/* ── DRAG DROP ZONE ──────────────────────────── */
+.dropzone {
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius);
+  padding: 60px 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  background: rgba(22,27,34,0.6);
+  position: relative;
+}
+
+.dropzone:hover,
+.dropzone.drag-over {
+  border-color: var(--accent-blue);
+  background: rgba(0,170,255,0.06);
+  box-shadow: 0 0 0 4px rgba(0,170,255,0.08);
+}
+
+.dropzone-icon {
+  font-size: 52px;
+  color: var(--accent-blue);
+  display: block;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 0 10px rgba(0,170,255,0.4));
+  transition: var(--transition);
+}
+
+.dropzone:hover .dropzone-icon {
+  transform: translateY(-4px);
+  filter: drop-shadow(0 0 18px rgba(0,170,255,0.6));
+}
+
+.dropzone h3 {
+  font-family: var(--font-title);
+  font-size: 18px;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.dropzone p {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.dropzone .hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 10px;
+}
+
+/* ── PREVIEW BOX ─────────────────────────────── */
+.preview-box {
+  display: none;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.preview-box img {
+  max-width: 280px;
+  max-height: 280px;
+  border-radius: var(--radius);
+  border: 2px solid var(--accent-blue);
+  box-shadow: 0 0 24px rgba(0,170,255,0.25);
+  object-fit: contain;
+  background: #000;
+}
+
+.preview-box .preview-name {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+/* ── PATIENT FORM ────────────────────────────── */
+.patient-form-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 28px;
+}
+
+/* ── RESULT SECTION ─────────────────────────── */
+.result-banner {
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.result-banner.disease {
+  background: rgba(231,76,60,0.1);
+  border: 1px solid rgba(231,76,60,0.35);
+}
+
+.result-banner.normal {
+  background: rgba(46,204,113,0.1);
+  border: 1px solid rgba(46,204,113,0.35);
+}
+
+.result-icon {
+  font-size: 40px;
+}
+
+.result-label {
+  font-family: var(--font-title);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.result-confidence {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* ── CONFIDENCE BARS ────────────────────────── */
+.conf-bar-wrap {
+  margin-bottom: 10px;
+}
+
+.conf-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.conf-bar-track {
+  height: 7px;
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.conf-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s ease;
+}
+
+/* ── ACTION BUTTONS ROW ─────────────────────── */
+.result-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}

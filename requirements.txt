@@ -1,0 +1,13 @@
+flask
+flask-login
+flask-bcrypt
+pymongo
+tensorflow
+opencv-python
+pillow
+reportlab
+numpy
+matplotlib
+scipy
+gunicorn
+python-dotenv

@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Report — {{ scan.patient_name }}{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}"/>
+{% endblock %}
+{% block page_title %}<i class="fas fa-file-medical" style="color:var(--accent-teal)"></i> Diagnostic Report{% endblock %}
+
+{% block content %}
+<div class="page-content report-page">
+<div style="max-width:1000px;margin:0 auto;">
+
+  <!-- Diagnosis Box -->
+  <div class="diagnosis-box {{ 'normal' if scan.predicted_label == 'Normal' else 'disease' }} mb-2">
+    <h2 style="color:{{ '#2ecc71' if scan.predicted_label == 'Normal' else '#e74c3c' }}">
+      {{ scan.predicted_label.upper() }}
+    </h2>
+    <p style="color:var(--text-secondary);margin-top:4px;">
+      AI Confidence: <strong style="color:var(--accent-blue);">{{ scan.confidence }}%</strong>
+      {% if scan.is_urgent %}
+        &nbsp;<span class="badge badge-urgent"><span class="urgent-dot"></span>URGENT</span>
+      {% endif %}
+    </p>
+  </div>
+
+  <!-- Patient Meta -->
+  <div class="report-meta-grid mb-2">
+    {% for label, value in [
+      ('Patient Name', scan.patient_name),
+      ('Age / Gender', scan.patient_age ~ ' / ' ~ scan.patient_gender),
+      ('Patient ID',   scan.patient_id),
+      ('Scan Date',    scan.created_at.strftime('%d %b %Y'))
+    ] %}
+    <div class="report-meta-item">
+      <div class="meta-label">{{ label }}</div>
+      <div class="meta-value">{{ value }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Scan Images -->
+  {% if scan.heatmap_paths.original %}
+  <div class="scan-img-row mb-2">
+    {% for path, label in [
+      (scan.heatmap_paths.original, 'Original X-Ray'),
+      (scan.heatmap_paths.heatmap,  'Grad-CAM Heatmap'),
+      (scan.heatmap_paths.overlay,  'Overlay Analysis')
+    ] %}
+    <div class="scan-img-card">
+      {% if path %}
+        <img src="{{ url_for('static', filename=path.replace('static/','')) }}" alt="{{ label }}"/>
+      {% else %}
+        <div style="height:180px;background:var(--bg-card);border-radius:8px;
+                    display:flex;align-items:center;justify-content:center;color:var(--text-muted);">
+          Generate Heatmap First
+        </div>
+      {% endif %}
+      <p>{{ label }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-warning mb-2">
+    <i class="fas fa-exclamation-triangle"></i>
+    Heatmap not generated yet.
+    <a href="{{ url_for('heatmap.index', scan_id=scan_id) }}"
+       style="color:var(--accent-blue);font-weight:600;">Generate Heatmap</a> first for full report.
+  </div>
+  {% endif %}
+
+  <!-- Confidence Scores -->
+  <div class="card mb-2">
+    <div class="card-title"><i class="fas fa-chart-bar"></i> Class Confidence Breakdown</div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr><th>Disease Class</th><th>Confidence</th><th>Risk Level</th></tr>
+        </thead>
+        <tbody>
+          {% for s in scan.all_scores %}
+          <tr>
+            <td style="color:var(--text-primary);font-weight:600;">{{ s.class }}</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="flex:1;height:6px;background:var(--bg-secondary);border-radius:4px;">
+                  <div style="width:{{ s.confidence }}%;height:100%;
+                               background:{{ s.color }};border-radius:4px;"></div>
+                </div>
+                <span style="color:var(--accent-blue);font-weight:600;min-width:44px;">
+                  {{ s.confidence }}%
+                </span>
+              </div>
+            </td>
+            <td>
+              {% if s.confidence > 60 %}
+                <span class="badge badge-urgent">HIGH</span>
+              {% elif s.confidence > 30 %}
+                <span class="badge badge-pending">MODERATE</span>
+              {% else %}
+                <span class="badge badge-normal">LOW</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Findings Form -->
+  <form method="POST" action="{{ url_for('report.index', scan_id=scan_id) }}"
+        id="report-form">
+    <div class="card mb-2">
+      <div class="card-title"><i class="fas fa-stethoscope"></i> Radiologist Findings</div>
+      <div class="form-group">
+        <textarea name="findings" id="findings" class="form-control findings-editor"
+                  placeholder="Enter clinical findings and observations...">{{ scan.findings or existing_report.findings if existing_report else '' }}</textarea>
+        <div style="text-align:right;font-size:11px;color:var(--text-muted);margin-top:4px;">
+          <span id="findings-count">0</span> characters
+        </div>
+      </div>
+    </div>
+    <div class="card mb-2">
+      <div class="card-title"><i class="fas fa-prescription"></i> Recommendation</div>
+      <div class="form-group">
+        <textarea name="recommendation" class="form-control findings-editor"
+                  placeholder="Clinical recommendations for this patient...">{{ scan.recommendation or existing_report.recommendation if existing_report else '' }}</textarea>
+      </div>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="report-action-bar">
+      <div style="display:flex;gap:10px;align-items:center;">
+        {% if existing_report and existing_report.is_signed %}
+          <span class="signed-badge"><i class="fas fa-check-circle"></i> Signed Report</span>
+        {% elif existing_report %}
+          <form method="POST"
+                action="{{ url_for('report.sign', report_id=existing_report._id|string) }}">
+            <button type="submit" class="btn btn-teal btn-sm" id="sign-btn">
+              <i class="fas fa-pen-nib"></i> Sign Report
+            </button>
+          </form>
+        {% endif %}
+      </div>
+      <div style="display:flex;gap:10px;">
+        {% if existing_report %}
+        <button type="button" class="btn btn-outline" id="download-btn"
+                data-url="{{ url_for('report.download', scan_id=scan_id) }}">
+          <i class="fas fa-download"></i> Download PDF
+        </button>
+        <button type="button" class="btn btn-outline" id="print-btn">
+          <i class="fas fa-print"></i> Print
+        </button>
+        {% endif %}
+        <button type="submit" class="btn btn-primary" id="generate-btn">
+          <i class="fas fa-file-pdf"></i>
+          {{ 'Regenerate Report' if existing_report else 'Generate PDF Report' }}
+        </button>
+      </div>
+    </div>
+  </form>
+
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/report.js') }}"></script>
+{% endblock %}

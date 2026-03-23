@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — JRS Radiology AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+
+<div class="login-page">
+  <div class="login-box">
+
+    <div class="login-logo">
+      <i class="fas fa-lungs logo-icon"></i>
+      <h1>JRS RADIOLOGY AI</h1>
+      <p>Advanced Chest X-Ray Diagnostic System</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">
+          <i class="fas fa-info-circle"></i> {{ message }}
+        </div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.login') }}">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <div class="input-icon-wrap">
+          <i class="fas fa-envelope"></i>
+          <input type="email" name="email" class="form-control"
+                 placeholder="doctor@hospital.com" required autofocus/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="input-icon-wrap">
+          <i class="fas fa-lock"></i>
+          <input type="password" name="password" class="form-control"
+                 placeholder="••••••••" required/>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary login-btn">
+        <i class="fas fa-sign-in-alt"></i> Sign In
+      </button>
+    </form>
+
+    <div class="login-divider">or</div>
+
+    <div class="login-footer">
+      Don't have an account?
+      <a href="{{ url_for('auth.register') }}">Create Account</a>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
